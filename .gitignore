@@ -12,3 +12,7 @@ Cargo.lock
 .env
 devcontainerInstall.log
 .vscode/settings.json
+.claude
+plans
+.repomixignore
+release-manifest.json
