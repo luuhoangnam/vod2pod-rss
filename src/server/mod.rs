@@ -96,6 +96,10 @@ async fn transcodize_rss(
         return HttpResponse::BadRequest().finish();
     };
 
+    let min_duration: Option<u64> = query
+        .get("min_duration")
+        .and_then(|v| v.parse().ok());
+
     let transcode_service_url = req.url_for("transcode_mp3", [""]).unwrap();
 
     let parsed_url = match Url::parse(url) {
@@ -120,8 +124,13 @@ async fn transcodize_rss(
         return HttpResponse::InternalServerError().finish();
     };
 
+    let cache_key = match min_duration {
+        Some(min) => format!("{}|min_duration={}", parsed_url, min),
+        None => parsed_url.to_string(),
+    };
+
     let cached_rss: Option<String> = redis::cmd("GET")
-        .arg(&parsed_url.to_string())
+        .arg(&cache_key)
         .query_async(&mut redis)
         .await
         .unwrap_or_default();
@@ -146,6 +155,7 @@ async fn transcodize_rss(
     let injected_feed = rss_transcodizer::inject_vod2pod_customizations(
         raw_rss,
         should_transcode.then_some(transcode_service_url),
+        min_duration,
     );
 
     let body = match injected_feed {
@@ -163,7 +173,7 @@ async fn transcodize_rss(
         Err(_) => 600,
     };
     let _: () = redis::cmd("SET")
-        .arg(&parsed_url.to_string())
+        .arg(&cache_key)
         .arg(&body)
         .arg("EX")
         .arg(cache_ttl)

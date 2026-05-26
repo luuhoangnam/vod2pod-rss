@@ -98,6 +98,10 @@
       <button class="btn btn-primary" type="button" id="generateButton" onclick="generateRSSURL()">Generate RSS</button>
     </div>
     <div class="input-group mb-3">
+      <span class="input-group-text" style="background-color:#2d2d2d;color:#aaa;border-color:#555;">Min duration (sec)</span>
+      <input type="number" class="form-control" id="minDuration" placeholder="Optional, e.g. 300" min="0" style="background-color:#2d2d2d;color:#fff;border-color:#555;">
+    </div>
+    <div class="input-group mb-3">
       <input type="text" class="form-control" id="rssUrl" placeholder="Generated RSS URL" readonly autocomplete="off">
       <button class="btn btn-secondary" type="button" id="copyButton" onclick="copyToClipboard()" style="width: 100px;">Copy URL</button>
     </div>
@@ -142,8 +146,9 @@ function clearInput() {
 
 async function generateRSSURL() {
   const channelUrl = document.getElementById("channelUrl").value;
+  const minDuration = document.getElementById("minDuration").value;
   const baseUrl = window.location.href.endsWith('/') ? window.location.href : window.location.href + '/';
-  const rssUrl = `${baseUrl}transcodize_rss?url=${channelUrl}`;
+  const rssUrl = `${baseUrl}transcodize_rss?url=${channelUrl}${minDuration ? `&min_duration=${minDuration}` : ''}`;
   document.getElementById("rssUrl").value = rssUrl;
   await displayRSSPreview(rssUrl);
 }
