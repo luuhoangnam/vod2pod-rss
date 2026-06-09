@@ -28,6 +28,7 @@ pub enum ConfName {
     FfmpegTimeoutSeconds,
     Host,
     Port,
+    YoutubeApiUrl,
 }
 
 struct EnvConf {}
@@ -127,6 +128,8 @@ impl Conf for EnvConf {
             ConfName::Port => {
                 Ok(std::env::var("VOD2POD_RSS_PORT").unwrap_or_else(|_| "8080".to_string()))
             }
+            ConfName::YoutubeApiUrl => Ok(std::env::var("YT_API_URL")
+                .unwrap_or_else(|_| "https://youtube.googleapis.com/".to_string())),
         }
     }
 }

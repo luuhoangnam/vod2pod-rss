@@ -457,12 +457,16 @@ fn get_youtube_hub() -> YouTube<hyper_rustls::HttpsConnector<hyper::client::Http
     let auth = google_youtube3::client::NoToken;
     let connector = hyper_rustls::HttpsConnectorBuilder::new()
         .with_native_roots()
-        .https_only()
+        .https_or_http()
         .enable_http1()
         .build();
     let client = hyper::Client::builder().build(connector);
 
-    YouTube::new(client, auth)
+    let mut hub = YouTube::new(client, auth);
+    let api_url = conf().get(ConfName::YoutubeApiUrl).unwrap();
+    hub.base_url(api_url.clone());
+    hub.root_url(api_url);
+    hub
 }
 
 #[io_cached(
